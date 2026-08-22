@@ -1,4 +1,4 @@
-const CACHE_NAME = "postit-game-v9";
+const CACHE_NAME = "postit-game-v10";
 
 
 const APP_FILES = [
