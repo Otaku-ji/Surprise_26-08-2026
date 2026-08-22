@@ -692,6 +692,46 @@ const JAR2_START_DATE =
 
 
 /* =========================
+   LAST OPENED JAR
+========================= */
+
+const LAST_OPENED_JAR_KEY =
+    "postit_last_opened_jar";
+
+
+function setLastOpenedJar(
+    jar
+) {
+
+    localStorage.setItem(
+        LAST_OPENED_JAR_KEY,
+        jar
+    );
+
+}
+
+
+function getLastOpenedJar() {
+
+    return localStorage.getItem(
+        LAST_OPENED_JAR_KEY
+    );
+
+}
+
+
+/*
+   This page is Jar 2,
+   so record that Jar 2 is
+   currently the active jar.
+*/
+
+setLastOpenedJar(
+    "jar2"
+);
+
+
+/* =========================
    LOCAL CACHE
 ========================= */
 
@@ -1847,10 +1887,6 @@ async function loadJar2() {
            ========================================
            APPLY CURRENT LOCAL STATE FIRST
            ========================================
-
-           This allows the jar to become usable
-           immediately while the server state is
-           synchronized.
         */
 
         const collectionKey =
@@ -2893,6 +2929,16 @@ if (jar2Button) {
     jar2Button.addEventListener(
         "click",
         () => {
+
+            /*
+               We are leaving Jar 2
+               and opening Jar 1.
+            */
+
+            setLastOpenedJar(
+                "jar1"
+            );
+
 
             window.location.href =
                 "index.html";

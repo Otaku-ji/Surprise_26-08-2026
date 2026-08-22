@@ -130,6 +130,34 @@ const CATEGORIES_CACHE_KEY =
 const IMAGE_CACHE_NAME =
     "postit-image-cache-v1";
 
+
+/* =========================
+   LAST OPENED JAR
+========================= */
+
+const LAST_OPENED_JAR_KEY =
+    "postit_last_opened_jar";
+
+
+function setLastOpenedJar(jar) {
+
+    localStorage.setItem(
+        LAST_OPENED_JAR_KEY,
+        jar
+    );
+
+}
+
+
+function getLastOpenedJar() {
+
+    return localStorage.getItem(
+        LAST_OPENED_JAR_KEY
+    ) || "jar1";
+
+}
+
+
 /*
    Collection data is stored
    separately for each user.
@@ -361,6 +389,7 @@ function loadCache(
 
 }
 
+
 /* =========================
    IMAGE CACHE
 ========================= */
@@ -506,6 +535,7 @@ async function getCachedNoteImage(
     }
 
 }
+
 
 /* =========================
    OG JAR PHOTO
@@ -671,6 +701,16 @@ if (
         "click",
         () => {
 
+            /*
+               Remember that Jar 2 was
+               the last jar opened.
+            */
+
+            setLastOpenedJar(
+                "jar2"
+            );
+
+
             window.location.href =
                 "jar2.html";
 
@@ -700,6 +740,7 @@ if (
     );
 
 }
+
 
 /* =========================
    PENDING ACTIONS
@@ -936,10 +977,10 @@ async function loadGame() {
 
         updateInterface();
 
-statusElement.innerHTML =
-    availableNotes.length === 0
-        ? `You've collected every Post-it! <img src="./icons/your-hearts-draw-post-it.png" class="status-emoji" alt=""> `
-        : "Tap the jar to draw a Post-it.";
+        statusElement.innerHTML =
+            availableNotes.length === 0
+                ? `You've collected every Post-it! <img src="./icons/your-hearts-draw-post-it.png" class="status-emoji" alt=""> `
+                : "Tap the jar to draw a Post-it.";
 
     }
 
@@ -1023,7 +1064,7 @@ async function syncFromSupabase() {
 
     /* =========================
        LOAD CATEGORIES
-========================= */
+    ========================= */
 
     const {
         data: categoryData,
@@ -1133,7 +1174,7 @@ async function syncFromSupabase() {
     ) {
 
         statusElement.innerHTML =
-        `You've collected every Post-it! <img src="./icons/hearts-draw-post-it.png" class="status-emoji" alt="">`;
+            `You've collected every Post-it! <img src="./icons/hearts-draw-post-it.png" class="status-emoji" alt="">`;
 
     } else {
 
@@ -1628,8 +1669,8 @@ bigNote.addEventListener(
             availableNotes.length === 0
         ) {
 
-        statusElement.innerHTML =
-        `You've collected every Post-it! <img src="./icons/hearts-draw-post-it.png" class="status-emoji" alt="">`;
+            statusElement.innerHTML =
+                `You've collected every Post-it! <img src="./icons/hearts-draw-post-it.png" class="status-emoji" alt="">`;
 
         } else {
 
@@ -1849,6 +1890,7 @@ function renderJar() {
     );
 
 }
+
 
 /* =========================
    COLLECTION BUTTON
@@ -2154,6 +2196,7 @@ function formatCategory(
 
 }
 
+
 /* =========================
    PIN SESSION
 ========================= */
@@ -2213,6 +2256,7 @@ function isPinSessionActive() {
 
 }
 
+
 /* =========================
    PIN ACTIVITY
 ========================= */
@@ -2232,11 +2276,72 @@ document.addEventListener(
     updatePinActivity
 );
 
+
 /* =========================
    START
 ========================= */
 
 async function startApp() {
+
+    /*
+       Remember which jar was last opened.
+    */
+
+    const lastOpenedJar =
+        getLastOpenedJar();
+
+
+    /*
+       Determine whether the current
+       page is Jar 1.
+
+       Jar 1 is index.html or the
+       root URL.
+    */
+
+    const isJar1Page =
+        window.location.pathname.endsWith(
+            "index.html"
+        ) ||
+        window.location.pathname.endsWith(
+            "/"
+        );
+
+
+    /*
+       If Jar 2 was the last jar opened,
+       automatically open Jar 2 instead
+       of starting on Jar 1.
+    */
+
+    if (
+        isJar1Page &&
+        lastOpenedJar === "jar2"
+    ) {
+
+        window.location.href =
+            "jar2.html";
+
+        return;
+
+    }
+
+
+    /*
+       If we are actually opening Jar 1,
+       remember Jar 1 as the last opened jar.
+    */
+
+    if (
+        isJar1Page
+    ) {
+
+        setLastOpenedJar(
+            "jar1"
+        );
+
+    }
+
 
     const loggedIn =
         await requireLogin();
@@ -2264,8 +2369,8 @@ async function startApp() {
 
 
     /*
-   PIN session lasts 15 minutes
-   from the last activity.
+       PIN session lasts 15 minutes
+       from the last activity.
     */
 
     if (!isPinSessionActive()) {
@@ -2280,8 +2385,10 @@ async function startApp() {
 
     updatePinActivity();
 
-        loadGame();
 
-    }
+    loadGame();
+
+}
+
 
 startApp();
