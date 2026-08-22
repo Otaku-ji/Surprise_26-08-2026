@@ -662,6 +662,17 @@ async function cacheAllJar2Music() {
 
 }
 
+/*
+   DEVELOPER SETTINGS
+*/
+
+/*
+   Set to true  = Reset Jar button works.
+   Set to false = Reset Jar button is visible but disabled.
+*/
+
+const JAR2_RESET_ENABLED = false;
+
 
 /* =========================
    GAME DATA
@@ -694,7 +705,7 @@ let isJar2Drawing = false;
 let jar2DrawCooldown = false;
 
 const JAR2_DRAW_COOLDOWN =
-    2 * 1000;
+    1500;
 
 const JAR2_START_DATE =
     "2025-07-19";
@@ -1034,6 +1045,17 @@ const resetButton =
     document.getElementById(
         "jar2ResetButton"
     );
+
+/*
+   Developer-controlled reset button.
+*/
+
+if (resetButton) {
+
+    resetButton.disabled =
+        !JAR2_RESET_ENABLED;
+
+}
 
 
 const jar2Button =
@@ -3070,6 +3092,13 @@ if (resetButton) {
     resetButton.addEventListener(
         "click",
         async () => {
+
+            if (!JAR2_RESET_ENABLED) {
+
+                return;
+
+            }
+
 
             const confirmed =
                 window.confirm(
