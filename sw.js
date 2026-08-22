@@ -1,4 +1,4 @@
-const CACHE_NAME = "postit-game-v8";
+const CACHE_NAME = "postit-game-v9";
 
 
 const APP_FILES = [
@@ -32,14 +32,16 @@ self.addEventListener(
     event => {
 
         console.log(
-            "Service Worker: installing..."
+            "Service Worker: installing v9..."
         );
 
 
         event.waitUntil(
 
             caches
-                .open(CACHE_NAME)
+                .open(
+                    CACHE_NAME
+                )
                 .then(
                     cache =>
                         cache.addAll(
@@ -49,6 +51,12 @@ self.addEventListener(
 
         );
 
+
+        /*
+           Activate the new service worker
+           immediately instead of waiting for
+           all old pages/tabs to close.
+        */
 
         self.skipWaiting();
 
@@ -65,7 +73,7 @@ self.addEventListener(
     event => {
 
         console.log(
-            "Service Worker: activated."
+            "Service Worker: activated v9."
         );
 
 
@@ -102,7 +110,7 @@ self.addEventListener(
                                     cacheName => {
 
                                         console.log(
-                                            "Deleting old cache:",
+                                            "Deleting old application cache:",
                                             cacheName
                                         );
 
@@ -118,11 +126,20 @@ self.addEventListener(
 
                     }
                 )
+                .then(
+                    () => {
+
+                        /*
+                           Take control of all existing
+                           pages immediately.
+                        */
+
+                        return self.clients.claim();
+
+                    }
+                )
 
         );
-
-
-        self.clients.claim();
 
     }
 );
@@ -153,7 +170,10 @@ self.addEventListener(
 
 
         /*
-           Never cache Supabase requests.
+           Never intercept Supabase requests.
+
+           Supabase handles its own network
+           communication and authentication.
         */
 
         if (
@@ -168,13 +188,143 @@ self.addEventListener(
 
 
         /*
+           Determine whether this is an
+           application file.
+
+           These are the files where we most
+           strongly want the newest version
+           when the device is online.
+        */
+
+        const isAppFile =
+            url.pathname.endsWith(
+                ".html"
+            ) ||
+            url.pathname.endsWith(
+                ".js"
+            ) ||
+            url.pathname.endsWith(
+                ".css"
+            );
+
+
+        /*
+           APPLICATION FILES
+           
+           NETWORK FIRST + NO BROWSER CACHE
+
+           This is the important fix.
+
+           When online, the browser must ask
+           GitHub Pages for the current file
+           instead of being allowed to return
+           an older HTTP-cached version.
+
+           If the network request fails,
+           the service-worker cache is used.
+        */
+
+        if (
+            isAppFile
+        ) {
+
+            event.respondWith(
+
+                fetch(
+                    new Request(
+                        event.request,
+                        {
+                            cache: "no-store"
+                        }
+                    )
+                )
+                    .then(
+                        response => {
+
+                            /*
+                               Only cache successful
+                               normal responses.
+                            */
+
+                            if (
+                                response &&
+                                response.status ===
+                                    200 &&
+                                response.type ===
+                                    "basic"
+                            ) {
+
+                                const responseClone =
+                                    response.clone();
+
+
+                                caches
+                                    .open(
+                                        CACHE_NAME
+                                    )
+                                    .then(
+                                        cache => {
+
+                                            cache.put(
+                                                event.request,
+                                                responseClone
+                                            );
+
+                                        }
+                                    )
+                                    .catch(
+                                        error => {
+
+                                            console.error(
+                                                "Service Worker: cache update failed:",
+                                                error
+                                            );
+
+                                        }
+                                    );
+
+                            }
+
+
+                            return response;
+
+                        }
+                    )
+                    .catch(
+                        () => {
+
+                            console.log(
+                                "Service Worker: network unavailable, using cached app file:",
+                                event.request.url
+                            );
+
+
+                            return caches.match(
+                                event.request
+                            );
+
+                        }
+                    )
+
+            );
+
+
+            return;
+
+        }
+
+
+        /*
+           OTHER FILES
+           
            NETWORK FIRST
 
-           Try the newest version from
-           GitHub Pages first.
+           Images, icons, manifest, etc. still
+           use the normal network-first strategy.
 
-           If there is no internet,
-           use the cached version.
+           Your separate postit-image-cache-v1
+           and postit-music-cache-v1 caches
+           are NOT touched by this service worker.
         */
 
         event.respondWith(
@@ -192,7 +342,8 @@ self.addEventListener(
 
                         if (
                             response &&
-                            response.status === 200 &&
+                            response.status ===
+                                200 &&
                             response.type ===
                                 "basic"
                         ) {
@@ -214,6 +365,16 @@ self.addEventListener(
                                         );
 
                                     }
+                                )
+                                .catch(
+                                    error => {
+
+                                        console.error(
+                                            "Service Worker: cache update failed:",
+                                            error
+                                        );
+
+                                    }
                                 );
 
                         }
@@ -229,7 +390,7 @@ self.addEventListener(
                         /*
                            No internet.
 
-                           Use the cached version.
+                           Use the application cache.
                         */
 
                         return caches.match(
