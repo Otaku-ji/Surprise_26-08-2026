@@ -16,102 +16,212 @@ const db =
     );
 
 
-
 /* =========================
    IMAGE and MUSIC CACHE
 ========================= */
-const IMAGE_CACHE_NAME ="postit-image-cache-v1";
-const MUSIC_CACHE_NAME ="postit-music-cache-v1";
 
-async function cacheNoteImage(
+const IMAGE_CACHE_NAME =
+    "postit-image-cache-v1";
+
+const MUSIC_CACHE_NAME =
+    "postit-music-cache-v1";
+
+
+const imageCachePromises =
+    new Map();
+
+const musicCachePromises =
+    new Map();
+
+
+/* =========================
+   IMAGE CACHE
+========================= */
+
+async function isNoteImageCached(
     imagePath
 ) {
 
-    if (
-        !imagePath ||
-        !db ||
-        !navigator.onLine
-    ) {
+    if (!imagePath) {
 
-        return null;
+        return false;
 
     }
 
-
     try {
-
-        const {
-            data,
-            error
-        } =
-            await db.storage
-                .from("postit-images")
-                .createSignedUrl(
-                    imagePath,
-                    60 * 60
-                );
-
-
-        if (
-            error ||
-            !data ||
-            !data.signedUrl
-        ) {
-
-            console.error(
-                "JAR 2 IMAGE SIGNED URL ERROR:",
-                error
-            );
-
-            return null;
-
-        }
-
-
-        const response =
-            await fetch(
-                data.signedUrl
-            );
-
-
-        if (
-            !response.ok
-        ) {
-
-            console.error(
-                "JAR 2 IMAGE DOWNLOAD ERROR:",
-                response.status
-            );
-
-            return null;
-
-        }
-
 
         const cache =
             await caches.open(
                 IMAGE_CACHE_NAME
             );
 
+        const response =
+            await cache.match(
+                imagePath
+            );
 
-        await cache.put(
-            imagePath,
-            response.clone()
-        );
-
-
-        return imagePath;
+        return !!response;
 
     } catch (error) {
 
         console.error(
-            "JAR 2 IMAGE CACHE ERROR:",
+            "JAR 2 IMAGE CACHE CHECK ERROR:",
             error
         );
+
+        return false;
+
+    }
+
+}
+
+
+async function cacheNoteImage(
+    imagePath
+) {
+
+    if (!imagePath) {
 
         return null;
 
     }
+
+
+    if (
+        await isNoteImageCached(
+            imagePath
+        )
+    ) {
+
+        return imagePath;
+
+    }
+
+
+    if (
+        imageCachePromises.has(
+            imagePath
+        )
+    ) {
+
+        return imageCachePromises.get(
+            imagePath
+        );
+
+    }
+
+
+    const cachePromise =
+        (async () => {
+
+            if (
+                !db ||
+                !navigator.onLine
+            ) {
+
+                return null;
+
+            }
+
+
+            try {
+
+                const {
+                    data,
+                    error
+                } =
+                    await db.storage
+                        .from("postit-images")
+                        .createSignedUrl(
+                            imagePath,
+                            60 * 60
+                        );
+
+
+                if (
+                    error ||
+                    !data ||
+                    !data.signedUrl
+                ) {
+
+                    console.error(
+                        "JAR 2 IMAGE SIGNED URL ERROR:",
+                        error
+                    );
+
+                    return null;
+
+                }
+
+
+                const response =
+                    await fetch(
+                        data.signedUrl
+                    );
+
+
+                if (
+                    !response.ok
+                ) {
+
+                    console.error(
+                        "JAR 2 IMAGE DOWNLOAD ERROR:",
+                        response.status
+                    );
+
+                    return null;
+
+                }
+
+
+                const cache =
+                    await caches.open(
+                        IMAGE_CACHE_NAME
+                    );
+
+
+                await cache.put(
+                    imagePath,
+                    response.clone()
+                );
+
+
+                console.log(
+                    "JAR 2 IMAGE CACHED:",
+                    imagePath
+                );
+
+
+                return imagePath;
+
+            } catch (error) {
+
+                console.error(
+                    "JAR 2 IMAGE CACHE ERROR:",
+                    imagePath,
+                    error
+                );
+
+                return null;
+
+            } finally {
+
+                imageCachePromises.delete(
+                    imagePath
+                );
+
+            }
+
+        })();
+
+
+    imageCachePromises.set(
+        imagePath,
+        cachePromise
+    );
+
+
+    return cachePromise;
 
 }
 
@@ -165,74 +275,23 @@ async function getCachedNoteImage(
 
 }
 
+
 /* =========================
    MUSIC CACHE
 ========================= */
 
-async function cacheNoteMusic(
+async function isNoteMusicCached(
     musicPath
 ) {
 
-    if (
-        !musicPath ||
-        !db ||
-        !navigator.onLine
-    ) {
+    if (!musicPath) {
 
-        return null;
+        return false;
 
     }
 
 
     try {
-
-        const {
-            data,
-            error
-        } =
-            await db.storage
-                .from("postit-music")
-                .createSignedUrl(
-                    musicPath,
-                    60 * 60
-                );
-
-
-        if (
-            error ||
-            !data ||
-            !data.signedUrl
-        ) {
-
-            console.error(
-                "JAR 2 MUSIC SIGNED URL ERROR:",
-                error
-            );
-
-            return null;
-
-        }
-
-
-        const response =
-            await fetch(
-                data.signedUrl
-            );
-
-
-        if (
-            !response.ok
-        ) {
-
-            console.error(
-                "JAR 2 MUSIC DOWNLOAD ERROR:",
-                response.status
-            );
-
-            return null;
-
-        }
-
 
         const cache =
             await caches.open(
@@ -240,30 +299,174 @@ async function cacheNoteMusic(
             );
 
 
-        await cache.put(
-            musicPath,
-            response.clone()
-        );
+        const response =
+            await cache.match(
+                musicPath
+            );
 
 
-        console.log(
-            "JAR 2 MUSIC CACHED:",
-            musicPath
-        );
-
-
-        return musicPath;
+        return !!response;
 
     } catch (error) {
 
         console.error(
-            "JAR 2 MUSIC CACHE ERROR:",
+            "JAR 2 MUSIC CACHE CHECK ERROR:",
             error
         );
+
+        return false;
+
+    }
+
+}
+
+
+async function cacheNoteMusic(
+    musicPath
+) {
+
+    if (!musicPath) {
 
         return null;
 
     }
+
+
+    if (
+        await isNoteMusicCached(
+            musicPath
+        )
+    ) {
+
+        return musicPath;
+
+    }
+
+
+    if (
+        musicCachePromises.has(
+            musicPath
+        )
+    ) {
+
+        return musicCachePromises.get(
+            musicPath
+        );
+
+    }
+
+
+    const cachePromise =
+        (async () => {
+
+            if (
+                !db ||
+                !navigator.onLine
+            ) {
+
+                return null;
+
+            }
+
+
+            try {
+
+                const {
+                    data,
+                    error
+                } =
+                    await db.storage
+                        .from("postit-music")
+                        .createSignedUrl(
+                            musicPath,
+                            60 * 60
+                        );
+
+
+                if (
+                    error ||
+                    !data ||
+                    !data.signedUrl
+                ) {
+
+                    console.error(
+                        "JAR 2 MUSIC SIGNED URL ERROR:",
+                        error
+                    );
+
+                    return null;
+
+                }
+
+
+                const response =
+                    await fetch(
+                        data.signedUrl
+                    );
+
+
+                if (
+                    !response.ok
+                ) {
+
+                    console.error(
+                        "JAR 2 MUSIC DOWNLOAD ERROR:",
+                        response.status
+                    );
+
+                    return null;
+
+                }
+
+
+                const cache =
+                    await caches.open(
+                        MUSIC_CACHE_NAME
+                    );
+
+
+                await cache.put(
+                    musicPath,
+                    response.clone()
+                );
+
+
+                console.log(
+                    "JAR 2 MUSIC CACHED:",
+                    musicPath
+                );
+
+
+                return musicPath;
+
+            } catch (error) {
+
+                console.error(
+                    "JAR 2 MUSIC CACHE ERROR:",
+                    musicPath,
+                    error
+                );
+
+                return null;
+
+            } finally {
+
+                musicCachePromises.delete(
+                    musicPath
+                );
+
+            }
+
+        })();
+
+
+    musicCachePromises.set(
+        musicPath,
+        cachePromise
+    );
+
+
+    return cachePromise;
 
 }
 
@@ -317,8 +520,9 @@ async function getCachedNoteMusic(
 
 }
 
+
 /* =========================
-   CACHE ALL JAR 2 IMAGES
+   CACHE ALL JAR 2 MEDIA
 ========================= */
 
 async function cacheAllJar2Images() {
@@ -334,15 +538,24 @@ async function cacheAllJar2Images() {
     }
 
 
-    const imageNotes =
-        allJar2Notes.filter(
-            note =>
-                note.image_url
-        );
+    const imagePaths =
+        [
+            ...new Set(
+                allJar2Notes
+                    .filter(
+                        note =>
+                            note.image_url
+                    )
+                    .map(
+                        note =>
+                            note.image_url
+                    )
+            )
+        ];
 
 
     if (
-        imageNotes.length === 0
+        imagePaths.length === 0
     ) {
 
         return;
@@ -351,38 +564,35 @@ async function cacheAllJar2Images() {
 
 
     console.log(
-        `JAR 2: Caching ${imageNotes.length} images...`
+        `JAR 2: Background caching ${imagePaths.length} images...`
     );
 
 
-    for (
-        const note of imageNotes
-    ) {
+    const results =
+        await Promise.allSettled(
+            imagePaths.map(
+                imagePath =>
+                    cacheNoteImage(
+                        imagePath
+                    )
+            )
+        );
 
-        try {
 
-            await cacheNoteImage(
-                note.image_url
-            );
-
-        } catch (error) {
-
-            console.error(
-                "JAR 2 IMAGE CACHE ERROR:",
-                note.image_url,
-                error
-            );
-
-        }
-
-    }
+    const successful =
+        results.filter(
+            result =>
+                result.status === "fulfilled" &&
+                result.value
+        ).length;
 
 
     console.log(
-        "JAR 2: All available images cached."
+        `JAR 2: Background image caching finished. ${successful}/${imagePaths.length} available.`
     );
 
 }
+
 
 async function cacheAllJar2Music() {
 
@@ -397,15 +607,24 @@ async function cacheAllJar2Music() {
     }
 
 
-    const musicNotes =
-        allJar2Notes.filter(
-            note =>
-                note.music_url
-        );
+    const musicPaths =
+        [
+            ...new Set(
+                allJar2Notes
+                    .filter(
+                        note =>
+                            note.music_url
+                    )
+                    .map(
+                        note =>
+                            note.music_url
+                    )
+            )
+        ];
 
 
     if (
-        musicNotes.length === 0
+        musicPaths.length === 0
     ) {
 
         return;
@@ -414,72 +633,62 @@ async function cacheAllJar2Music() {
 
 
     console.log(
-        `JAR 2: Caching ${musicNotes.length} music file(s)...`
+        `JAR 2: Background caching ${musicPaths.length} music file(s)...`
     );
 
 
-    for (
-        const note of musicNotes
-    ) {
-
-        try {
-
-            /*
-               First check whether the
-               music is already cached.
-            */
-
-            const cachedMusic =
-                await getCachedNoteMusic(
-                    note.music_url
-                );
+    const results =
+        await Promise.allSettled(
+            musicPaths.map(
+                musicPath =>
+                    cacheNoteMusic(
+                        musicPath
+                    )
+            )
+        );
 
 
-            /*
-               Only download it when it
-               isn't already cached.
-            */
-
-            if (!cachedMusic) {
-
-                await cacheNoteMusic(
-                    note.music_url
-                );
-
-            }
-
-        } catch (error) {
-
-            console.error(
-                "JAR 2 MUSIC CACHE ERROR:",
-                note.music_url,
-                error
-            );
-
-        }
-
-    }
+    const successful =
+        results.filter(
+            result =>
+                result.status === "fulfilled" &&
+                result.value
+        ).length;
 
 
     console.log(
-        "JAR 2: All available music cached."
+        `JAR 2: Background music caching finished. ${successful}/${musicPaths.length} available.`
     );
 
 }
- 
+
+
 /* =========================
    GAME DATA
 ========================= */
 
 let allJar2Notes = [];
+
 let availableJar2Notes = [];
+
 let collectedJar2Notes = [];
+
 let jar2Categories = [];
+
 let availableDailyDraws = 0;
 
 let currentUser = null;
 
-const JAR2_START_DATE = "2025-07-19";
+
+/*
+   Prevent multiple simultaneous draws.
+*/
+
+let isJar2Drawing = false;
+
+
+const JAR2_START_DATE =
+    "2025-07-19";
 
 
 /* =========================
@@ -501,6 +710,7 @@ function getJar2CollectionCacheKey() {
 
     }
 
+
     return (
         "jar2_collection_cache_" +
         currentUser.id
@@ -517,6 +727,7 @@ function getJar2PendingCollectionsKey() {
 
     }
 
+
     return (
         "jar2_pending_collections_" +
         currentUser.id
@@ -532,6 +743,7 @@ function getJar2PendingResetKey() {
         return null;
 
     }
+
 
     return (
         "jar2_pending_reset_" +
@@ -581,11 +793,13 @@ function loadCache(
                 key
             );
 
+
         if (!stored) {
 
             return fallback;
 
         }
+
 
         return JSON.parse(
             stored
@@ -604,6 +818,7 @@ function loadCache(
 
 }
 
+
 /* =========================
    JAR 2 PENDING ACTIONS
 ========================= */
@@ -613,11 +828,13 @@ function getPendingJar2Collections() {
     const key =
         getJar2PendingCollectionsKey();
 
+
     if (!key) {
 
         return [];
 
     }
+
 
     return loadCache(
         key,
@@ -634,11 +851,13 @@ function savePendingJar2Collections(
     const key =
         getJar2PendingCollectionsKey();
 
+
     if (!key) {
 
         return;
 
     }
+
 
     saveCache(
         key,
@@ -653,11 +872,13 @@ function isJar2ResetPending() {
     const key =
         getJar2PendingResetKey();
 
+
     if (!key) {
 
         return false;
 
     }
+
 
     return loadCache(
         key,
@@ -674,11 +895,13 @@ function setJar2ResetPending(
     const key =
         getJar2PendingResetKey();
 
+
     if (!key) {
 
         return;
 
     }
+
 
     saveCache(
         key,
@@ -687,11 +910,10 @@ function setJar2ResetPending(
 
 }
 
+
 /* =========================
    ELEMENTS
 ========================= */
-
-
 
 const remainingElement =
     document.getElementById(
@@ -704,60 +926,72 @@ const collectedElement =
         "jar2Collected"
     );
 
+
 const jarElement =
     document.getElementById(
         "jar2"
     );
+
 
 const jarNotesElement =
     document.getElementById(
         "jar2Notes"
     );
 
+
 const statusElement =
     document.getElementById(
         "jar2Status"
     );
+
 
 const modal =
     document.getElementById(
         "jar2NoteModal"
     );
 
+
 const bigNote =
     document.getElementById(
         "jar2BigNote"
     );
+
 
 const noteCategory =
     document.getElementById(
         "jar2NoteCategory"
     );
 
+
 const noteText =
     document.getElementById(
         "jar2NoteText"
     );
+
 
 const noteDate =
     document.getElementById(
         "jar2NoteDate"
     );
 
+
 const collectionButton =
     document.getElementById(
         "jar2CollectionButton"
     );
+
 
 const resetButton =
     document.getElementById(
         "jar2ResetButton"
     );
 
+
 const jar2Button =
     document.getElementById(
         "jar2Button"
     );
+
 
 /* =========================
    OG JAR PHOTO
@@ -768,18 +1002,22 @@ const ogButton =
         "ogButton"
     );
 
+
 const ogOverlay =
     document.getElementById(
         "ogOverlay"
     );
+
 
 const ogImage =
     document.getElementById(
         "ogImage"
     );
 
+
 const OG_JAR_IMAGE =
     "OG_JAR.jpeg";
+
 
 async function cacheOGJarImage() {
 
@@ -875,6 +1113,7 @@ async function cacheOGJarImage() {
 
 }
 
+
 async function getCachedOGJarImage() {
 
     try {
@@ -915,20 +1154,12 @@ async function getCachedOGJarImage() {
 
 }
 
-async function showOGJar() {
 
-    /*
-       First try the local cache.
-    */
+async function showOGJar() {
 
     let imageUrl =
         await getCachedOGJarImage();
 
-
-    /*
-       If it isn't cached and we're online,
-       download it now.
-    */
 
     if (
         !imageUrl &&
@@ -943,10 +1174,6 @@ async function showOGJar() {
 
     }
 
-
-    /*
-       Show cached image.
-    */
 
     if (imageUrl) {
 
@@ -968,10 +1195,6 @@ async function showOGJar() {
 
     }
 
-
-    /*
-       Nothing available.
-    */
 
     console.error(
         "OG JAR IMAGE IS NOT AVAILABLE."
@@ -1056,6 +1279,7 @@ async function loadCurrentUser() {
 
 }
 
+
 /* =========================
    DAILY DRAW SYSTEM
 ========================= */
@@ -1065,12 +1289,14 @@ function getTodayDate() {
     const today =
         new Date();
 
+
     today.setHours(
         0,
         0,
         0,
         0
     );
+
 
     return today;
 
@@ -1083,16 +1309,14 @@ function getJar2AvailableDraws(
 
     const startDate =
         new Date(
-            JAR2_START_DATE + "T00:00:00"
+            JAR2_START_DATE +
+            "T00:00:00"
         );
+
 
     const today =
         getTodayDate();
 
-
-    /*
-       Jar 2 has not started yet.
-    */
 
     if (
         today < startDate
@@ -1102,14 +1326,6 @@ function getJar2AvailableDraws(
 
     }
 
-
-    /*
-       Calculate number of
-       calendar days since start.
-       
-       +1 means the start date
-       itself counts as a draw day.
-    */
 
     const millisecondsPerDay =
         1000 *
@@ -1132,11 +1348,6 @@ function getJar2AvailableDraws(
         elapsedDays + 1;
 
 
-    /*
-       Every collected Post-it
-       consumes one earned draw.
-    */
-
     const availableDraws =
         earnedDraws -
         totalCollected;
@@ -1148,6 +1359,81 @@ function getJar2AvailableDraws(
     );
 
 }
+
+
+/* =========================
+   APPLY COLLECTION STATE
+========================= */
+
+function applyJar2CollectionState(
+    collectionData
+) {
+
+    const collections =
+        Array.isArray(
+            collectionData
+        )
+            ? collectionData
+            : [];
+
+
+    const collectedIds =
+        collections.map(
+            item =>
+                item.note_id
+        );
+
+
+    availableJar2Notes =
+        allJar2Notes.filter(
+            note =>
+                !collectedIds.includes(
+                    note.id
+                )
+        );
+
+
+    collectedJar2Notes =
+        allJar2Notes
+            .filter(
+                note =>
+                    collectedIds.includes(
+                        note.id
+                    )
+            )
+            .map(
+                note => {
+
+                    const collection =
+                        collections.find(
+                            item =>
+                                item.note_id ===
+                                note.id
+                        );
+
+
+                    return {
+
+                        ...note,
+
+                        drawn_at:
+                            collection
+                                ? collection.drawn_at
+                                : null
+
+                    };
+
+                }
+            );
+
+
+    availableDailyDraws =
+        getJar2AvailableDraws(
+            collectedJar2Notes.length
+        );
+
+}
+
 
 /* =========================
    SAVE JAR 2 LOCAL GAME
@@ -1177,11 +1463,14 @@ function saveJar2LocalGame() {
             collectionKey,
             collectedJar2Notes.map(
                 note => ({
+
                     note_id:
                         note.id,
 
                     drawn_at:
-                        note.drawn_at || null
+                        note.drawn_at ||
+                        null
+
                 })
             )
         );
@@ -1224,64 +1513,30 @@ function loadJar2LocalGame() {
             : [];
 
 
-    const collectedIds =
-        cachedCollection.map(
-            item =>
-                item.note_id
-        );
+    if (
+        allJar2Notes.length === 0 ||
+        jar2Categories.length === 0
+    ) {
+
+        return false;
+
+    }
 
 
-    availableJar2Notes =
-        allJar2Notes.filter(
-            note =>
-                !collectedIds.includes(
-                    note.id
-                )
-        );
+    /*
+       Reconstruct the complete local game
+       state from the cached collection.
+    */
 
-
-    collectedJar2Notes =
-        allJar2Notes
-            .filter(
-                note =>
-                    collectedIds.includes(
-                        note.id
-                    )
-            )
-            .map(
-                note => {
-
-                    const collection =
-                        cachedCollection.find(
-                            item =>
-                                item.note_id ===
-                                note.id
-                        );
-
-                    return {
-
-                        ...note,
-
-                        drawn_at:
-                            collection
-                                ? collection.drawn_at
-                                : null
-
-                    };
-
-                }
-            );
-
-
-    return (
-        allJar2Notes.length > 0 &&
-        jar2Categories.length > 0
+    applyJar2CollectionState(
+        cachedCollection
     );
 
+
+    return true;
+
 }
-/* =========================
-   SYNC PENDING JAR 2 CHANGES
-========================= */
+
 
 /* =========================
    SYNC PENDING JAR 2 CHANGES
@@ -1327,20 +1582,10 @@ async function syncPendingJar2Changes() {
         }
 
 
-        /*
-           Reset successfully reached
-           Supabase.
-        */
-
         setJar2ResetPending(
             false
         );
 
-
-        /*
-           Any draws that existed before
-           the reset are no longer relevant.
-        */
 
         savePendingJar2Collections(
             []
@@ -1378,10 +1623,6 @@ async function syncPendingJar2Changes() {
     );
 
 
-    /*
-       Process one pending draw at a time.
-    */
-
     while (
         pending.length > 0
     ) {
@@ -1410,14 +1651,6 @@ async function syncPendingJar2Changes() {
                 });
 
 
-            /*
-               Upload failed.
-
-               Keep this item in local storage
-               and stop. It will be retried
-               the next time we reconnect.
-            */
-
             if (error) {
 
                 console.error(
@@ -1429,13 +1662,6 @@ async function syncPendingJar2Changes() {
 
             }
 
-
-            /*
-               Upload succeeded.
-
-               Remove ONLY this successfully
-               synchronized item from the queue.
-            */
 
             pending.shift();
 
@@ -1451,15 +1677,6 @@ async function syncPendingJar2Changes() {
             );
 
         } catch (error) {
-
-            /*
-               IMPORTANT:
-
-               The current item remains in
-               local storage because we only
-               remove it after a successful
-               Supabase insert.
-            */
 
             console.error(
                 "JAR 2: Pending synchronization stopped.",
@@ -1479,6 +1696,7 @@ async function syncPendingJar2Changes() {
 
 }
 
+
 /* =========================
    LOAD NOTES
 ========================= */
@@ -1488,9 +1706,12 @@ async function loadJar2() {
     statusElement.textContent =
         "Loading jar...";
 
+
     /*
-   First load locally cached data.
-*/
+       ========================================
+       FIRST: LOAD LOCAL CACHE
+       ========================================
+    */
 
     const hasLocalData =
         loadJar2LocalGame();
@@ -1498,43 +1719,43 @@ async function loadJar2() {
 
     if (hasLocalData) {
 
-        availableDailyDraws =
-            getJar2AvailableDraws(
-                collectedJar2Notes.length
-            );
-
-
         updateInterface();
 
 
         statusElement.textContent =
-            availableJar2Notes.length === 0
-                ? "You've collected every Post-it!"
-                : availableDailyDraws === 0
-                    ? "No Post-it available today. Come back tomorrow!"
-                    : "Tap the jar to draw a Post-it.";
+            getJar2StatusMessage();
 
     }
 
-            /*
-        No internet:
-        continue using local data.
-        */
 
-        if (
-            !navigator.onLine
-        ) {
+    /*
+       ========================================
+       OFFLINE
+       ========================================
+    */
 
-            if (!hasLocalData) {
+    if (
+        !navigator.onLine
+    ) {
 
-                statusElement.textContent =
-                    "Connect to the internet once to load the Special Jar.";
+        if (!hasLocalData) {
 
-            }
+            statusElement.textContent =
+                "Connect to the internet once to load the Special Jar.";
 
-            return;
+        }
 
-}
+
+        return;
+
+    }
+
+
+    /*
+       ========================================
+       ONLINE: LOAD FROM SUPABASE
+       ========================================
+    */
 
     try {
 
@@ -1542,7 +1763,7 @@ async function loadJar2() {
            Load all active notes.
         */
 
-       const {
+        const {
             data: notes,
             error: notesError
         } = await db
@@ -1558,7 +1779,9 @@ async function loadJar2() {
                 "active",
                 true
             )
-            .order("id");
+            .order(
+                "id"
+            );
 
 
         if (notesError) {
@@ -1568,14 +1791,25 @@ async function loadJar2() {
         }
 
 
-     console.log("JAR 2 NOTES FROM SUPABASE:", notes);
+        console.log(
+            "JAR 2 NOTES FROM SUPABASE:",
+            notes
+        );
 
-     console.log(
-    "JAR 2 NOTES COUNT FROM SUPABASE:",
-    notes ? notes.length : 0
-);
 
-     const {
+        console.log(
+            "JAR 2 NOTES COUNT FROM SUPABASE:",
+            notes
+                ? notes.length
+                : 0
+        );
+
+
+        /*
+           Load categories.
+        */
+
+        const {
             data: categoryData,
             error: categoryError
         } = await db
@@ -1583,7 +1817,9 @@ async function loadJar2() {
             .select(
                 "id, name, color"
             )
-            .order("id");
+            .order(
+                "id"
+            );
 
 
         if (categoryError) {
@@ -1596,30 +1832,113 @@ async function loadJar2() {
         jar2Categories =
             categoryData || [];
 
+
         allJar2Notes =
             notes || [];
+
 
         console.log(
             "JAR 2 ALL NOTES AFTER ASSIGNMENT:",
             allJar2Notes.length
         );
 
-        await cacheAllJar2Images();
 
-        await cacheAllJar2Music();
+        /*
+           ========================================
+           APPLY CURRENT LOCAL STATE FIRST
+           ========================================
 
-        await cacheOGJarImage();
+           This allows the jar to become usable
+           immediately while the server state is
+           synchronized.
+        */
 
-                    /*
-        Upload any draws that were made
-        while offline.
+        const collectionKey =
+            getJar2CollectionCacheKey();
+
+
+        const localCollection =
+            collectionKey
+                ? loadCache(
+                    collectionKey,
+                    []
+                )
+                : [];
+
+
+        applyJar2CollectionState(
+            localCollection
+        );
+
+
+        saveJar2LocalGame();
+
+
+        updateInterface();
+
+
+        statusElement.textContent =
+            getJar2StatusMessage();
+
+
+        /*
+           ========================================
+           BACKGROUND MEDIA CACHING
+           ========================================
+        */
+
+        if (navigator.onLine) {
+
+            cacheAllJar2Images()
+                .catch(
+                    error =>
+                        console.error(
+                            "JAR 2 BACKGROUND IMAGE CACHE ERROR:",
+                            error
+                        )
+                );
+
+
+            cacheAllJar2Music()
+                .catch(
+                    error =>
+                        console.error(
+                            "JAR 2 BACKGROUND MUSIC CACHE ERROR:",
+                            error
+                        )
+                );
+
+
+            cacheOGJarImage()
+                .catch(
+                    error =>
+                        console.error(
+                            "JAR 2 BACKGROUND OG JAR CACHE ERROR:",
+                            error
+                        )
+                );
+
+        }
+
+
+        /*
+           ========================================
+           SYNCHRONIZE PENDING CHANGES
+           ========================================
         */
 
         await syncPendingJar2Changes();
 
+
+        /*
+           ========================================
+           GET DEFINITIVE SUPABASE COLLECTION
+           ========================================
+        */
+
         const {
-            data: collections,
-            error: collectionsError
+            data: syncedCollections,
+            error: syncedCollectionsError
         } = await db
             .from("jar2_collections")
             .select(
@@ -1637,42 +1956,33 @@ async function loadJar2() {
             );
 
 
-        if (collectionsError) {
+        if (syncedCollectionsError) {
 
-            throw collectionsError;
+            throw syncedCollectionsError;
 
         }
 
 
         /*
-           Store collection information
-           together with the note.
+           Apply the definitive server collection.
         */
 
-        const collectedIds =
-            (collections || []).map(
-                item =>
-                    item.note_id
-            );
+        applyJar2CollectionState(
+            syncedCollections || []
+        );
 
-
-        availableJar2Notes =
-            allJar2Notes.filter(
-                note =>
-                    !collectedIds.includes(
-                        note.id
-                    )
-            );
 
         console.log(
             "JAR 2 COLLECTED COUNT:",
             collectedJar2Notes.length
         );
 
+
         console.log(
             "JAR 2 AVAILABLE COUNT:",
             availableJar2Notes.length
         );
+
 
         console.log(
             "JAR 2 TOTAL COUNT:",
@@ -1680,52 +1990,22 @@ async function loadJar2() {
         );
 
 
-        collectedJar2Notes =
-            allJar2Notes
-                .filter(
-                    note =>
-                        collectedIds.includes(
-                            note.id
-                        )
-                )
-                .map(
-                    note => {
-
-                        const collection =
-                            collections.find(
-                                item =>
-                                    item.note_id ===
-                                    note.id
-                            );
-
-
-                        return {
-                            ...note,
-
-                            drawn_at:
-                                collection
-                                    ? collection.drawn_at
-                                    : null
-                        };
-
-                    }
-                );
-
-
-        updateInterface();
-
-        availableDailyDraws =
-            getJar2AvailableDraws(
-                collectedJar2Notes.length
-            );
+        /*
+           Save the synchronized state locally.
+        */
 
         saveJar2LocalGame();
 
 
+        /*
+           Update the interface one final time.
+        */
+
+        updateInterface();
+
+
         statusElement.textContent =
-            availableJar2Notes.length === 0
-                ? "You've collected every Post-it!"
-                : "Tap the jar to draw a Post-it.";
+            getJar2StatusMessage();
 
 
     } catch (error) {
@@ -1736,72 +2016,66 @@ async function loadJar2() {
         );
 
 
-        statusElement.textContent =
-            "Could not load the Special Jar.";
+        /*
+           If cached data exists, keep using it.
+        */
+
+        if (hasLocalData) {
+
+            updateInterface();
+
+
+            statusElement.textContent =
+                "Could not sync. Your local game is still available.";
+
+        } else {
+
+            statusElement.textContent =
+                "Could not load the Special Jar.";
+
+        }
 
     }
 
 }
 
+
 /* =========================
-   ONLINE / OFFLINE
+   STATUS MESSAGE
 ========================= */
 
-window.addEventListener(
-    "online",
-    async () => {
+function getJar2StatusMessage() {
 
-        console.log(
-            "Jar 2 internet connection restored."
+    if (
+        availableJar2Notes.length === 0
+    ) {
+
+        return (
+            "You've collected every Post-it!"
         );
 
-
-        statusElement.textContent =
-            "Connection restored. Syncing...";
-
-
-        try {
-
-            /*
-               Upload pending offline draws
-               and refresh the authoritative
-               Supabase collection.
-            */
-
-            await loadJar2();
-
-
-        } catch (error) {
-
-            console.error(
-                "JAR 2 SYNC ERROR:",
-                error
-            );
-
-
-            statusElement.textContent =
-                "Could not sync. Your local game is still safe.";
-
-        }
-
     }
-);
 
 
-window.addEventListener(
-    "offline",
-    () => {
+    if (
+        availableDailyDraws === 0
+    ) {
 
-        console.log(
-            "Jar 2 offline mode."
+        return (
+            "No Post-it available today. Come back tomorrow!"
         );
 
-
-        statusElement.textContent =
-            "Offline mode — your Special Jar is saved locally.";
-
     }
-);
+
+
+    return (
+        availableDailyDraws === 1
+            ? "You have 1 Post-it to draw."
+            : `You have ${availableDailyDraws} Post-its to draw.`
+    );
+
+}
+
 
 /* =========================
    UPDATE INTERFACE
@@ -1809,8 +2083,13 @@ window.addEventListener(
 
 function updateInterface() {
 
-    remainingElement.textContent =
-        availableJar2Notes.length;
+    if (remainingElement) {
+
+        remainingElement.textContent =
+            availableJar2Notes.length;
+
+    }
+
 
     if (collectedElement) {
 
@@ -1819,9 +2098,11 @@ function updateInterface() {
 
     }
 
+
     renderJar();
 
 }
+
 
 /* =========================
    GET CATEGORY COLOR
@@ -1855,11 +2136,19 @@ function getJar2CategoryColor(
 
 }
 
+
 /* =========================
    RENDER JAR
 ========================= */
 
 function renderJar() {
+
+    if (!jarNotesElement) {
+
+        return;
+
+    }
+
 
     jarNotesElement.innerHTML =
         "";
@@ -1926,6 +2215,7 @@ function renderJar() {
                     categoryColor
                 );
 
+
             note.style.left =
                 `${random(2, 92)}%`;
 
@@ -1949,11 +2239,24 @@ function renderJar() {
 
 }
 
+
 /* =========================
    DRAW NOTE
 ========================= */
 
 async function drawNote() {
+
+    /*
+       Prevent a second draw from starting
+       while the first draw is still running.
+    */
+
+    if (isJar2Drawing) {
+
+        return;
+
+    }
+
 
     if (
         availableJar2Notes.length === 0
@@ -1979,128 +2282,192 @@ async function drawNote() {
     }
 
 
-    jarElement.classList.add(
-        "shaking"
-    );
+    isJar2Drawing =
+        true;
+
+
+    if (jarElement) {
+
+        jarElement.classList.add(
+            "shaking"
+        );
+
+    }
 
 
     statusElement.textContent =
         "Mixing the Post-its...";
 
 
-    await wait(700);
+    try {
 
-
-    jarElement.classList.remove(
-        "shaking"
-    );
-
-
-    jarElement.classList.add(
-        "lid-open"
-    );
-
-
-    await wait(500);
-
-
-    /*
-       Select random note.
-    */
-
-    const randomIndex =
-        Math.floor(
-            Math.random() *
-            availableJar2Notes.length
+        await wait(
+            700
         );
 
 
-    const note =
-        availableJar2Notes[
-            randomIndex
-        ];
+        if (jarElement) {
 
-
-    /*
-       The exact moment the note
-       is drawn.
-    */
-
-    const drawnAt =
-        new Date().toISOString();
-
-
-    /*
-   UPDATE LOCAL STATE FIRST.
-
-   The draw should work even when
-   there is no internet connection.
-*/
-
-availableJar2Notes.splice(
-    randomIndex,
-    1
-);
-
-
-availableDailyDraws--;
-
-
-collectedJar2Notes.push({
-
-    ...note,
-
-    drawn_at:
-        drawnAt
-
-});
-
-
-/*
-   Save the updated collection locally.
-*/
-
-saveJar2LocalGame();
-
-
-/*
-   If online, try to save immediately.
-   Otherwise put the draw into the
-   pending queue.
-*/
-
-if (
-    db &&
-    navigator.onLine
-) {
-
-    try {
-
-        const {
-            error
-        } = await db
-            .from("jar2_collections")
-            .insert({
-
-                note_id:
-                    note.id,
-
-                user_id:
-                    currentUser.id,
-
-                drawn_at:
-                    drawnAt
-
-            });
-
-
-        if (error) {
-
-            console.error(
-                "JAR 2 ONLINE COLLECTION ERROR:",
-                error
+            jarElement.classList.remove(
+                "shaking"
             );
 
+
+            jarElement.classList.add(
+                "lid-open"
+            );
+
+        }
+
+
+        await wait(
+            500
+        );
+
+
+        /*
+           Select random note.
+        */
+
+        const randomIndex =
+            Math.floor(
+                Math.random() *
+                availableJar2Notes.length
+            );
+
+
+        const note =
+            availableJar2Notes[
+                randomIndex
+            ];
+
+
+        /*
+           Exact draw timestamp.
+        */
+
+        const drawnAt =
+            new Date().toISOString();
+
+
+        /*
+           UPDATE LOCAL STATE FIRST.
+        */
+
+        availableJar2Notes.splice(
+            randomIndex,
+            1
+        );
+
+
+        availableDailyDraws--;
+
+
+        collectedJar2Notes.push({
+
+            ...note,
+
+            drawn_at:
+                drawnAt
+
+        });
+
+
+        /*
+           Save immediately.
+        */
+
+        saveJar2LocalGame();
+
+
+        /*
+           Try Supabase immediately when online.
+        */
+
+        if (
+            db &&
+            navigator.onLine
+        ) {
+
+            try {
+
+                const {
+                    error
+                } = await db
+                    .from("jar2_collections")
+                    .insert({
+
+                        note_id:
+                            note.id,
+
+                        user_id:
+                            currentUser.id,
+
+                        drawn_at:
+                            drawnAt
+
+                    });
+
+
+                if (error) {
+
+                    console.error(
+                        "JAR 2 ONLINE COLLECTION ERROR:",
+                        error
+                    );
+
+
+                    const pending =
+                        getPendingJar2Collections();
+
+
+                    pending.push({
+
+                        note_id:
+                            note.id,
+
+                        drawn_at:
+                            drawnAt
+
+                    });
+
+
+                    savePendingJar2Collections(
+                        pending
+                    );
+
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "JAR 2 ONLINE COLLECTION ERROR:",
+                    error
+                );
+
+
+                const pending =
+                    getPendingJar2Collections();
+
+
+                pending.push({
+
+                    note_id:
+                        note.id,
+
+                    drawn_at:
+                        drawnAt
+
+                });
+
+
+                savePendingJar2Collections(
+                    pending
+                );
+
+            }
+
+        } else {
 
             const pending =
                 getPendingJar2Collections();
@@ -2123,71 +2490,30 @@ if (
 
         }
 
-    } catch (error) {
 
-        console.error(
-            "JAR 2 ONLINE COLLECTION ERROR:",
-            error
+        updateInterface();
+
+
+        await wait(
+            300
         );
 
 
-        const pending =
-            getPendingJar2Collections();
+        await showNote({
 
-
-        pending.push({
-
-            note_id:
-                note.id,
+            ...note,
 
             drawn_at:
                 drawnAt
 
         });
 
+    } finally {
 
-        savePendingJar2Collections(
-            pending
-        );
+        isJar2Drawing =
+            false;
 
     }
-
-} else {
-
-    const pending =
-        getPendingJar2Collections();
-
-
-    pending.push({
-
-        note_id:
-            note.id,
-
-        drawn_at:
-            drawnAt
-
-    });
-
-
-    savePendingJar2Collections(
-        pending
-    );
-
-}
-
-
-    updateInterface();
-
-
-    await wait(300);
-
-
-    showNote({
-        ...note,
-
-        drawn_at:
-            drawnAt
-    });
 
 }
 
@@ -2196,7 +2522,9 @@ if (
    SHOW NOTE
 ========================= */
 
-async function showNote(note) {
+async function showNote(
+    note
+) {
 
     noteCategory.textContent =
         note.category || "";
@@ -2206,11 +2534,8 @@ async function showNote(note) {
         "";
 
 
-        /*
-       NOTE CONTENT
-       
-       Jar 2 notes can contain both
-       text and an image.
+    /*
+       TEXT
     */
 
     if (
@@ -2242,20 +2567,11 @@ async function showNote(note) {
         note.image_url
     ) {
 
-        /*
-           First try the local cache.
-        */
-
         let imageUrl =
             await getCachedNoteImage(
                 note.image_url
             );
 
-
-        /*
-           If the image is not cached
-           and we are online, download it.
-        */
 
         if (
             !imageUrl &&
@@ -2321,112 +2637,104 @@ async function showNote(note) {
 
     }
 
-    /*
-   MUSIC
-*/
-
-if (
-    note.music_url
-) {
 
     /*
-       First try the local cache.
-    */
-
-    let musicUrl =
-        await getCachedNoteMusic(
-            note.music_url
-        );
-
-
-    /*
-       If the music is not cached
-       and we are online, download it.
+       MUSIC
     */
 
     if (
-        !musicUrl &&
-        navigator.onLine
+        note.music_url
     ) {
 
-        await cacheNoteMusic(
-            note.music_url
-        );
-
-
-        musicUrl =
+        let musicUrl =
             await getCachedNoteMusic(
                 note.music_url
             );
 
-    }
 
+        if (
+            !musicUrl &&
+            navigator.onLine
+        ) {
 
-    /*
-       Create audio player.
-    */
-
-    if (musicUrl) {
-
-        const audio =
-            document.createElement(
-                "audio"
-            );
-
-        audio.src =
-            musicUrl;
-
-
-        audio.controls =
-            true;
-        
-        audio.autoplay =
-            true;
-
-        audio.preload =
-            "metadata";
-
-
-        audio.className =
-            "note-music";
-
-
-        noteText.appendChild(
-            audio
-        );
-
-        audio.play().catch(
-            error => {
-
-        console.log(
-            "JAR 2 MUSIC AUTOPLAY BLOCKED:",
-            error
-        );
-
-    }
-);
-
-    } else if (
-        !navigator.onLine
-    ) {
-
-        const musicMessage =
-            document.createElement(
-                "div"
+            await cacheNoteMusic(
+                note.music_url
             );
 
 
-        musicMessage.textContent =
-            "Music unavailable offline.";
+            musicUrl =
+                await getCachedNoteMusic(
+                    note.music_url
+                );
+
+        }
 
 
-        noteText.appendChild(
-            musicMessage
-        );
+        if (musicUrl) {
+
+            const audio =
+                document.createElement(
+                    "audio"
+                );
+
+
+            audio.src =
+                musicUrl;
+
+
+            audio.controls =
+                true;
+
+
+            audio.autoplay =
+                true;
+
+
+            audio.preload =
+                "metadata";
+
+
+            audio.className =
+                "note-music";
+
+
+            noteText.appendChild(
+                audio
+            );
+
+
+            audio.play().catch(
+                error => {
+
+                    console.log(
+                        "JAR 2 MUSIC AUTOPLAY BLOCKED:",
+                        error
+                    );
+
+                }
+            );
+
+        } else if (
+            !navigator.onLine
+        ) {
+
+            const musicMessage =
+                document.createElement(
+                    "div"
+                );
+
+
+            musicMessage.textContent =
+                "Music unavailable offline.";
+
+
+            noteText.appendChild(
+                musicMessage
+            );
+
+        }
 
     }
-
-}
 
 
     /*
@@ -2451,7 +2759,7 @@ if (
 
 
     /*
-       Apply sticky-note colour.
+       APPLY STICKY NOTE COLOUR
     */
 
     const categoryColor =
@@ -2464,6 +2772,7 @@ if (
         `big-note ${convertColor(
             categoryColor
         )}`;
+
 
     modal.classList.add(
         "visible"
@@ -2502,84 +2811,77 @@ function formatDrawDate(
    CLOSE NOTE
 ========================= */
 
-bigNote.addEventListener(
-    "click",
-    () => {
+if (bigNote) {
 
-        /*
-           Stop any music when the note
-           is closed.
-        */
+    bigNote.addEventListener(
+        "click",
+        () => {
 
-        const audio =
-            bigNote.querySelector(
-                ".note-music"
+            const audio =
+                bigNote.querySelector(
+                    ".note-music"
+                );
+
+
+            if (audio) {
+
+                audio.pause();
+
+                audio.currentTime =
+                    0;
+
+                audio.remove();
+
+            }
+
+
+            modal.classList.remove(
+                "visible"
             );
 
 
-        if (audio) {
+            if (jarElement) {
 
-            audio.pause();
+                jarElement.classList.remove(
+                    "lid-open"
+                );
 
-            audio.currentTime = 0;
+            }
 
-            audio.remove();
+
+            statusElement.textContent =
+                getJar2StatusMessage();
 
         }
+    );
 
-
-        modal.classList.remove(
-            "visible"
-        );
-
-        jarElement.classList.remove(
-            "lid-open"
-        );
-
-        if (
-            availableJar2Notes.length === 0
-        ) {
-
-            statusElement.textContent =
-                "You've collected every Post-it!";
-
-        } else if (
-            availableDailyDraws === 0
-        ) {
-
-            statusElement.textContent =
-                "No Post-it available today. Come back tomorrow!";
-
-        } else {
-
-            statusElement.textContent =
-                availableDailyDraws === 1
-                    ? "You have 1 Post-it to draw."
-                    : `You have ${availableDailyDraws} Post-its to draw.`;
-
-        }
-    }
-);
+}
 
 
 /* =========================
    JAR CLICK
 ========================= */
 
-jarElement.addEventListener(
-    "click",
-    () => {
+if (jarElement) {
 
-        if (
-            availableJar2Notes.length > 0
-        ) {
+    jarElement.addEventListener(
+        "click",
+        () => {
 
-            drawNote();
+            if (
+                availableJar2Notes.length > 0 &&
+                availableDailyDraws > 0 &&
+                !isJar2Drawing
+            ) {
+
+                drawNote();
+
+            }
 
         }
+    );
 
-    }
-);
+}
 
 
 /* =========================
@@ -2656,10 +2958,15 @@ if (resetButton) {
 
 
             /*
-               RESET LOCAL STATE FIRST.
+               Prevent drawing during reset.
+            */
 
-               This makes reset work even
-               when the device is offline.
+            isJar2Drawing =
+                true;
+
+
+            /*
+               RESET LOCAL STATE FIRST.
             */
 
             availableJar2Notes =
@@ -2676,30 +2983,17 @@ if (resetButton) {
                 );
 
 
-            /*
-               Save the reset state locally.
-            */
-
             saveJar2LocalGame();
 
 
             /*
-               The reset supersedes all
-               previously pending draws.
+               Reset supersedes all pending draws.
             */
 
             savePendingJar2Collections(
                 []
             );
 
-
-            /*
-               Mark reset as pending.
-
-               If the device is offline,
-               this will be synchronized
-               later.
-            */
 
             setJar2ResetPending(
                 true
@@ -2708,11 +3002,6 @@ if (resetButton) {
 
             updateInterface();
 
-
-           /*
-            Try to reset Supabase
-            immediately if online.
-            */
 
             let resetSynced =
                 false;
@@ -2745,10 +3034,6 @@ if (resetButton) {
 
                     } else {
 
-                        /*
-                        Supabase reset succeeded.
-                        */
-
                         setJar2ResetPending(
                             false
                         );
@@ -2769,6 +3054,10 @@ if (resetButton) {
                 }
 
             }
+
+
+            isJar2Drawing =
+                false;
 
 
             resetButton.disabled =
@@ -2828,28 +3117,8 @@ window.addEventListener(
             await loadJar2();
 
 
-            if (
-                availableJar2Notes.length === 0
-            ) {
-
-                statusElement.textContent =
-                    "You've collected every Post-it!";
-
-            } else if (
-                availableDailyDraws === 0
-            ) {
-
-                statusElement.textContent =
-                    "No Post-it available today. Come back tomorrow!";
-
-            } else {
-
-                statusElement.textContent =
-                    availableDailyDraws === 1
-                        ? "You have 1 Post-it to draw."
-                        : `You have ${availableDailyDraws} Post-its to draw.`;
-
-            }
+            statusElement.textContent =
+                getJar2StatusMessage();
 
 
         } catch (error) {
@@ -2883,7 +3152,6 @@ window.addEventListener(
 
     }
 );
-
 
 
 /* =========================
@@ -2949,6 +3217,7 @@ function wait(
 
 }
 
+
 /* =========================
    PIN SESSION
 ========================= */
@@ -2956,9 +3225,14 @@ function wait(
 const PIN_SESSION_KEY =
     "postit_pin_last_activity";
 
-const PIN_TIMEOUT =
-    15 * 60 * 1000; // 15 minutes
 
+const PIN_TIMEOUT =
+    15 * 60 * 1000;
+
+
+/* =========================
+   PIN SESSION CHECK
+========================= */
 
 function isPinSessionActive() {
 
@@ -2978,7 +3252,8 @@ function isPinSessionActive() {
 
 
     return (
-        Date.now() - lastActivity <
+        Date.now() -
+        lastActivity <
         PIN_TIMEOUT
     );
 
@@ -2987,11 +3262,14 @@ function isPinSessionActive() {
 
 function updatePinActivity() {
 
-    if (!isPinSessionActive()) {
+    if (
+        !isPinSessionActive()
+    ) {
 
         return;
 
     }
+
 
     localStorage.setItem(
         PIN_SESSION_KEY,
@@ -3010,19 +3288,18 @@ document.addEventListener(
     updatePinActivity
 );
 
+
 document.addEventListener(
     "touchstart",
     updatePinActivity
 );
+
 
 document.addEventListener(
     "keydown",
     updatePinActivity
 );
 
-/* =========================
-   START
-========================= */
 
 /* =========================
    START
@@ -3045,7 +3322,9 @@ async function startJar2() {
        Require an active PIN session.
     */
 
-    if (!isPinSessionActive()) {
+    if (
+        !isPinSessionActive()
+    ) {
 
         sessionStorage.setItem(
             "pin_return_url",
@@ -3056,6 +3335,7 @@ async function startJar2() {
         window.location.href =
             "pin.html";
 
+
         return;
 
     }
@@ -3063,8 +3343,10 @@ async function startJar2() {
 
     /*
        PIN session is active.
-       Keep the 15-minute timer
-       alive from the latest activity.
+
+       Activity-based timeout means the
+       15-minute period is refreshed by
+       user interaction.
     */
 
     updatePinActivity();

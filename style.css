@@ -3302,3 +3302,51 @@ h1 {
     }
 
 }
+
+/* =========================
+   MOBILE JAR 2
+   MATCH JAR 1 SIZE
+========================= */
+
+@media (max-width: 600px) {
+
+    .jar2-page #jarSection {
+
+        min-height:
+            0;
+
+        padding:
+            10px
+            0;
+
+    }
+
+
+    .jar2-page .jar {
+
+        width:
+            min(
+                300px,
+                75vw
+            );
+
+        height:
+            min(
+                330px,
+                52vh
+            );
+
+    }
+
+
+    .jar2-page .jar-notes {
+
+        top:
+            90px;
+
+        bottom:
+            25px;
+
+    }
+
+}
