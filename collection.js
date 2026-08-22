@@ -1356,7 +1356,7 @@ const PIN_SESSION_KEY =
     "postit_pin_last_activity";
 
 const PIN_TIMEOUT =
-    15 * 60 * 1000;
+    5 * 60 * 1000;
 
 
 function isPinSessionActive() {

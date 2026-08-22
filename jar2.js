@@ -705,7 +705,7 @@ let isJar2Drawing = false;
 let jar2DrawCooldown = false;
 
 const JAR2_DRAW_COOLDOWN =
-    1500;
+    1800;
 
 const JAR2_START_DATE =
     "2025-07-19";
@@ -3395,7 +3395,7 @@ const PIN_SESSION_KEY =
 
 
 const PIN_TIMEOUT =
-    15 * 60 * 1000;
+    5 * 60 * 1000;
 
 
 /* =========================
