@@ -3350,3 +3350,58 @@ h1 {
     }
 
 }
+
+/* =========================
+   MOBILE BIG NOTES
+   ONLY SHRINK LONG NOTES
+========================= */
+
+@media (max-width: 600px) {
+
+    #jar2BigNote,
+    #jar2CollectionBigNote,
+    .big-note {
+        width: calc(100vw - 30px);
+        max-width: 430px;
+        max-height: calc(100vh - 40px);
+        min-height: 0;
+        height: auto;
+        padding: 28px 22px;
+        overflow-y: auto;
+    }
+
+    /* NORMAL NOTES: completely unchanged */
+    #jar2NoteText,
+    #jar2CollectionNoteText,
+    #noteText {
+        font-size: 28px;
+        line-height: 1.35;
+        margin-bottom: 35px;
+    }
+
+    /* 251–450 characters */
+    .big-note.note-long #noteText,
+    #jar2BigNote.note-long #jar2NoteText,
+    #jar2CollectionBigNote.note-long #jar2CollectionNoteText {
+        font-size: 20px;
+    }
+
+    /* 451+ characters */
+    .big-note.note-very-long #noteText,
+    #jar2BigNote.note-very-long #jar2NoteText,
+    #jar2CollectionBigNote.note-very-long #jar2CollectionNoteText {
+        font-size: 17px;
+    }
+}
+
+@media (max-width: 600px) {
+
+    .big-note.note-long {
+        font-size: 0.92em;
+    }
+
+    .big-note.note-very-long {
+        font-size: 0.82em;
+    }
+
+}

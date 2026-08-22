@@ -2282,6 +2282,11 @@ function renderJar() {
 
 async function drawNote() {
 
+    if (!isPinSessionActive()) {
+    window.location.href = "pin.html";
+    return;
+    }
+
     /*
        Prevent a second draw from starting
        while the first draw is still running.
@@ -2553,6 +2558,57 @@ async function drawNote() {
 
 }
 
+/* =========================
+   MOBILE NOTE TEXT FIT
+========================= */
+
+function fitMobileNoteText(
+    noteElement,
+    textElement
+) {
+
+    if (
+        !noteElement ||
+        !textElement
+    ) {
+
+        return;
+
+    }
+
+
+    noteElement.classList.remove(
+        "note-long",
+        "note-very-long"
+    );
+
+
+    const textLength =
+        textElement.textContent
+            .trim()
+            .length;
+
+
+    if (
+        textLength > 450
+    ) {
+
+        noteElement.classList.add(
+            "note-very-long"
+        );
+
+    } else if (
+        textLength > 250
+    ) {
+
+        noteElement.classList.add(
+            "note-long"
+        );
+
+    }
+
+}
+
 
 /* =========================
    SHOW NOTE
@@ -2574,25 +2630,31 @@ async function showNote(
        TEXT
     */
 
-    if (
-        note.text
-    ) {
+        if (
+            note.text
+        ) {
 
-        const textElement =
-            document.createElement(
-                "div"
+            const textElement =
+                document.createElement(
+                    "div"
+                );
+
+
+            textElement.innerHTML =
+                note.text;
+
+
+            noteText.appendChild(
+                textElement
             );
 
 
-        textElement.innerHTML =
-            note.text;
+            fitMobileNoteText(
+                bigNote,
+                textElement
+            );
 
-
-        noteText.appendChild(
-            textElement
-        );
-
-    }
+        }
 
 
     /*

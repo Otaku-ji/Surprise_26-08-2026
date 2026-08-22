@@ -37,6 +37,57 @@ const MUSIC_CACHE_NAME =
     "postit-music-cache-v1";
 
 /* =========================
+   AUTO-SHRINK LONG NOTE TEXT
+========================= */
+
+function fitMobileNoteText(
+    noteElement,
+    textElement
+) {
+
+    if (
+        !noteElement ||
+        !textElement
+    ) {
+
+        return;
+
+    }
+
+
+    noteElement.classList.remove(
+        "note-long",
+        "note-very-long"
+    );
+
+
+    const textLength =
+        textElement.textContent
+            .trim()
+            .length;
+
+
+    if (
+        textLength > 450
+    ) {
+
+        noteElement.classList.add(
+            "note-very-long"
+        );
+
+    } else if (
+        textLength > 250
+    ) {
+
+        noteElement.classList.add(
+            "note-long"
+        );
+
+    }
+
+}
+
+/* =========================
    IMAGE CACHE
 ========================= */
 
@@ -975,6 +1026,12 @@ async function createCollectionNote(
             text
         );
 
+
+        fitMobileNoteText(
+            sticky,
+            text
+        );
+
     }
 
 
@@ -1162,6 +1219,12 @@ async function showNote(
 
 
         noteText.appendChild(
+            text
+        );
+
+
+        fitMobileNoteText(
+            bigNote,
             text
         );
 
