@@ -687,6 +687,15 @@ let currentUser = null;
 let isJar2Drawing = false;
 
 
+/*
+   3-second cooldown between Jar 2 draws.
+*/
+
+let jar2DrawCooldown = false;
+
+const JAR2_DRAW_COOLDOWN =
+    3 * 1000;
+
 const JAR2_START_DATE =
     "2025-07-19";
 
@@ -2299,6 +2308,13 @@ async function drawNote() {
     }
 
 
+    if (jar2DrawCooldown) {
+
+        return;
+
+    }
+
+
     if (
         availableJar2Notes.length === 0
     ) {
@@ -2412,6 +2428,21 @@ async function drawNote() {
                 drawnAt
 
         });
+
+                /*
+        Start 3-second draw cooldown.
+        */
+
+        jar2DrawCooldown = true;
+
+        setTimeout(
+            () => {
+
+                jar2DrawCooldown = false;
+
+            },
+            JAR2_DRAW_COOLDOWN
+        );
 
 
         /*
