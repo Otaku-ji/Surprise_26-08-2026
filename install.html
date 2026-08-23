@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Welcome to your surprise gift! ❤️</title>
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+</head>
+
+<body class="install-page">
+
+<div class="install-app">
+
+    <header class="install-header">
+
+        <h1>
+            Surprise! ❤️
+        </h1>
+
+        <p class="install-welcome">
+            Welcome to your surprise!
+        </p>
+
+        <p class="install-intro">
+            Before you start playing, please install the game
+            on your iPhone Home Screen.
+        </p>
+
+    </header>
+
+
+    <!-- INSTALLATION STEPS -->
+
+    <main class="install-steps">
+
+        <section class="install-card">
+
+            <div class="install-number">
+                1
+            </div>
+
+            <div class="install-card-content">
+
+                <h2>
+                    Open this page in Safari
+                </h2>
+
+                <p>
+                    Make sure you are viewing this page
+                    in <strong>Safari</strong> on your iPhone.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <section class="install-card">
+
+            <div class="install-number">
+                2
+            </div>
+
+            <div class="install-card-content">
+
+                <h2>
+                    Tap the Share button
+                </h2>
+
+                <p>
+                    Tap the
+                    <strong>Share</strong>
+                    button in Safari.
+                </p>
+
+                <div class="install-share-icon">
+                    ↑
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <section class="install-card">
+
+            <div class="install-number">
+                3
+            </div>
+
+            <div class="install-card-content">
+
+                <h2>
+                    Add to Home Screen
+                </h2>
+
+                <p>
+                    Scroll down in the Share menu and tap
+                    <strong>Add to Home Screen</strong>.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <section class="install-card">
+
+            <div class="install-number">
+                4
+            </div>
+
+            <div class="install-card-content">
+
+                <h2>
+                    Tap "Add"
+                </h2>
+
+                <p>
+                    Confirm by tapping
+                    <strong>Add</strong>
+                    in the top-right corner.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <section class="install-card install-card-last">
+
+            <div class="install-number">
+                5
+            </div>
+
+            <div class="install-card-content">
+
+                <h2>
+                    Open your Surprise app on your Iphone
+                </h2>
+
+                <p>
+                    Find the new
+                    <strong>Surprise</strong>
+                    icon on your iPhone Home Screen
+                    and open it.
+                </p>
+
+                <div class="install-heart">
+                    ❤️
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- READY MESSAGE -->
+
+    <section class="install-ready">
+
+        <h2>
+            Almost ready! ❤️
+        </h2>
+
+        <p>
+            Once you've installed the game,
+            use the button below to start
+            <strong>Surpise</strong>.
+        </p>
+
+    </section>
+
+
+    <!-- START BUTTON -->
+
+    <div class="install-start-section">
+
+        <a
+            href="index.html"
+            class="install-start-button"
+        >
+            <span>❤️</span>
+            Start Surprise
+            <span>❤️</span>
+        </a>
+
+    </div>
+
+
+    <footer class="copyright">
+        © 2026 Surpise, made by Jia.
+        All rights reserved.
+    </footer>
+
+</div>
+
+
+<script>
+
+    /*
+       Register the service worker so the
+       installation page can also participate
+       in the PWA.
+    */
+
+    if ("serviceWorker" in navigator) {
+
+        window.addEventListener(
+            "load",
+            () => {
+
+                navigator.serviceWorker
+                    .register("./sw.js")
+                    .then(
+                        registration => {
+
+                            console.log(
+                                "Service Worker registered:",
+                                registration.scope
+                            );
+
+                        }
+                    )
+                    .catch(
+                        error => {
+
+                            console.error(
+                                "Service Worker registration failed:",
+                                error
+                            );
+
+                        }
+                    );
+
+            }
+        );
+
+    }
+
+</script>
+
+</body>
+</html>

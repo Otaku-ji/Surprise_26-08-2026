@@ -1,9 +1,10 @@
-const CACHE_NAME = "postit-game-v10";
+const CACHE_NAME = "postit-game-v12";
 
 
 const APP_FILES = [
     "./",
     "./index.html",
+    "./install.html",
     "./collection.html",
     "./style.css",
     "./app.js",
@@ -32,7 +33,7 @@ self.addEventListener(
     event => {
 
         console.log(
-            "Service Worker: installing v9..."
+            "Service Worker: installing v12..."
         );
 
 
@@ -73,7 +74,7 @@ self.addEventListener(
     event => {
 
         console.log(
-            "Service Worker: activated v9."
+            "Service Worker: activated v12."
         );
 
 
