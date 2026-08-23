@@ -713,7 +713,7 @@ let isJar2Drawing = false;
 let jar2DrawCooldown = false;
 
 const JAR2_DRAW_COOLDOWN =
-    1800;
+    100;
 
 const JAR2_START_DATE =
     "2025-07-19";
