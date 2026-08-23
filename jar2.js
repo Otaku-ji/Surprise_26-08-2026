@@ -707,16 +707,16 @@ let isJar2Drawing = false;
 
 
 /*
-   3-second cooldown between Jar 2 draws.
+   1.5-second cooldown between Jar 2 draws.
 */
 
 let jar2DrawCooldown = false;
 
 const JAR2_DRAW_COOLDOWN =
-    100;
+    1500;
 
 const JAR2_START_DATE =
-    "2025-07-19";
+    "2026-08-26";
 
 
 /* =========================
