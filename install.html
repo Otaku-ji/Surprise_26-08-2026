@@ -11,6 +11,22 @@
 
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
+
+    <script>
+
+    if (
+        sessionStorage.getItem(
+            "install_pin_authenticated"
+        ) !== "true"
+    ) {
+
+        window.location.replace(
+            "install-pin.html"
+        );
+
+    }
+
+    </script>
 </head>
 
 <body class="install-page">
@@ -23,13 +39,27 @@
             Surprise Gift! ❤️
         </h1>
 
+        <div class="welcome-image">
+            <img
+                src="./images/PostcardFinalTransparent.png"
+                alt="A special surprise"
+            >
+        </div>
+
+
+        <div class="personal-message">
+            <p>
+
+            </p>
+        </div>
+
         <p class="install-welcome">
             Welcome to your surprise!
         </p>
 
         <p class="install-intro">
             Before you open the gift, please install the gift (app)
-            on your iPhone Home Screen. Gift might have bugs xD.
+            on your iPhone Home Screen.
         </p>
 
     </header>
@@ -142,7 +172,7 @@
             <div class="install-card-content">
 
                 <h2>
-                    Open your Surprise app on your Iphone
+                    Open your Surprise app on your iPhone
                 </h2>
 
                 <p>
@@ -163,7 +193,7 @@
     </main>
 
     <footer class="copyright">
-        © 2026 Surpise, made by Jia.
+        © 2026 Surprise, made by Jia.
         All rights reserved.
     </footer>
 

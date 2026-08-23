@@ -1,4 +1,4 @@
-const CACHE_NAME = "postit-game-v12";
+const CACHE_NAME = "postit-game-v13";
 
 
 const APP_FILES = [
@@ -17,6 +17,9 @@ const APP_FILES = [
     "./pin.js",
     "./setup-pin.html",
     "./setup-pin.js",
+    "./install.html",
+    "./install-pin.html",
+    "./install-pin.js",
     "./manifest.json",
     "./icons/icon-192.png",
     "./icons/icon-512.png",
@@ -33,7 +36,7 @@ self.addEventListener(
     event => {
 
         console.log(
-            "Service Worker: installing v12..."
+            "Service Worker: installing v13..."
         );
 
 
@@ -74,7 +77,7 @@ self.addEventListener(
     event => {
 
         console.log(
-            "Service Worker: activated v12."
+            "Service Worker: activated v13."
         );
 
 

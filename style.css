@@ -2137,7 +2137,7 @@ h1 {
     }
 
 
-    body:not(.collection-page):not(.install-page) {
+    body:not(.collection-page):not(.install-page):not(.install-pin-page) {
 
         height: 100vh;
         overflow: hidden;
@@ -3826,4 +3826,438 @@ body.install-page .app {
         min-height: 60px;
         font-size: 18px;
     }
+}
+
+/* =========================
+   INSTALLATION PAGE
+   PERSONAL WELCOME
+========================= */
+
+.install-page .welcome-image {
+    width: min(500px, 100%);
+    margin: 25px auto 25px;
+    text-align: center;
+}
+
+.install-page .welcome-image img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 500px;
+    object-fit: contain;
+    border-radius: 16px;
+    box-shadow:
+        0 8px 25px
+        rgba(0, 0, 0, .18);
+}
+
+.install-page .personal-message {
+    width: min(650px, 100%);
+    margin: 0 auto 35px;
+    padding: 20px 25px;
+    background: rgba(255, 255, 255, .75);
+    border: 1px solid #ddd5c8;
+    border-radius: 16px;
+    box-shadow:
+        0 4px 15px
+        rgba(0, 0, 0, .08);
+    text-align: center;
+}
+
+.install-page .personal-message p {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.6;
+}
+
+/* =========================
+   INSTALLATION PAGE
+========================= */
+
+.install-page {
+    min-height: 100vh;
+    height: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+
+.install-page .app {
+    min-height: 100vh;
+    height: auto;
+    padding-bottom: 100px;
+}
+
+
+/* =========================
+   INSTALLATION WELCOME
+========================= */
+
+.install-page header {
+    margin-bottom: 25px;
+}
+
+
+.install-page .welcome-image {
+    width: min(
+        500px,
+        100%
+    );
+
+    margin:
+        25px auto;
+    
+    text-align: center;
+}
+
+
+.install-page .welcome-image img {
+    display: block;
+
+    width: 100%;
+    height: auto;
+
+    max-height: 500px;
+
+    object-fit: contain;
+
+    border-radius: 16px;
+
+    box-shadow:
+        0
+        8px
+        25px
+        rgba(
+            0,
+            0,
+            0,
+            .18
+        );
+}
+
+
+/* =========================
+   PERSONAL MESSAGE
+========================= */
+
+.install-page .personal-message {
+    width: min(
+        650px,
+        100%
+    );
+
+    margin:
+        0 auto
+        35px;
+
+    padding:
+        20px
+        25px;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            .75
+        );
+
+    border:
+        1px solid
+        #ddd5c8;
+
+    border-radius:
+        16px;
+
+    box-shadow:
+        0
+        4px
+        15px
+        rgba(
+            0,
+            0,
+            0,
+            .08
+        );
+
+    text-align:
+        center;
+}
+
+
+.install-page .personal-message p {
+    margin: 0;
+
+    font-size:
+        18px;
+
+    line-height:
+        1.6;
+}
+
+
+/* =========================
+   INSTALLATION TEXT
+========================= */
+
+.install-welcome,
+.install-instructions,
+.install-continue {
+    width: min(
+        650px,
+        100%
+    );
+
+    margin-left:
+        auto;
+
+    margin-right:
+        auto;
+}
+
+
+.install-page h2 {
+    margin-top: 30px;
+
+    font-size:
+        28px;
+
+    text-align:
+        center;
+}
+
+
+.install-page p {
+    line-height:
+        1.6;
+
+    font-size:
+        17px;
+}
+
+
+.install-instructions {
+    margin-top:
+        30px;
+
+    padding:
+        25px;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            .75
+        );
+
+    border:
+        1px solid
+        #ddd5c8;
+
+    border-radius:
+        16px;
+
+    box-shadow:
+        0
+        4px
+        15px
+        rgba(
+            0,
+            0,
+            0,
+            .08
+        );
+}
+
+
+.install-instructions ol {
+    padding-left:
+        25px;
+}
+
+
+.install-instructions li {
+    margin-bottom:
+        18px;
+
+    font-size:
+        17px;
+
+    line-height:
+        1.5;
+}
+
+
+/* =========================
+   CONTINUE BUTTON
+========================= */
+
+.install-continue {
+    text-align:
+        center;
+
+    margin-top:
+        35px;
+}
+
+
+#goToJar1Button {
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    border:
+        0;
+
+    background:
+        #29231c;
+
+    color:
+        white;
+
+    font-family:
+        inherit;
+
+    font-size:
+        18px;
+
+    font-weight:
+        800;
+
+    padding:
+        15px
+        28px;
+
+    border-radius:
+        12px;
+
+    cursor:
+        pointer;
+
+    transition:
+        transform .15s ease,
+        opacity .15s ease;
+}
+
+
+#goToJar1Button:hover {
+    transform:
+        translateY(-2px);
+}
+
+
+#goToJar1Button:active {
+    transform:
+        scale(.97);
+}
+
+
+/* =========================
+   INSTALL PIN PAGE
+========================= */
+
+.install-pin-page {
+    min-height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+
+.install-pin-page .pin-container {
+    min-height: 100vh;
+}
+
+
+/* =========================
+   8 PIN DOTS
+========================= */
+
+.install-pin-page .pin-dots {
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+
+.install-pin-page .pin-dots span {
+    width: 13px;
+    height: 13px;
+}
+
+
+/* =========================
+   MOBILE INSTALL PAGE
+========================= */
+
+@media (max-width: 600px) {
+
+    .install-page .app {
+        padding:
+            20px
+            15px
+            100px;
+    }
+
+
+    .install-page h1 {
+        font-size:
+            38px;
+    }
+
+
+    .install-page h2 {
+        font-size:
+            25px;
+    }
+
+
+    .install-page .welcome-image {
+        margin:
+            20px auto;
+    }
+
+
+    .install-page .personal-message {
+        padding:
+            18px;
+        margin-bottom:
+            25px;
+    }
+
+
+    .install-page .personal-message p {
+        font-size:
+            17px;
+    }
+
+
+    .install-instructions {
+        padding:
+            20px;
+    }
+
+
+    .install-instructions li {
+        font-size:
+            16px;
+    }
+
+
+    .install-pin-page .pin-container {
+        padding:
+            20px
+            25px;
+    }
+
+
+    .install-pin-page .pin-keypad {
+        gap:
+            12px;
+    }
+
 }
