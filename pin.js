@@ -1,10 +1,18 @@
+/*
+OLD
+
 const SUPABASE_URL =
     "https://vaqmavrjvjktqijlpxst.supabase.co";
 
-
 const SUPABASE_KEY =
     "sb_publishable_1VBFWiNkHPz5XmLHP_v8KA_iJHKwrCg";
+*/
 
+const SUPABASE_URL =
+    "https://tbmdgenwifujtzklnvja.supabase.co";
+
+const SUPABASE_KEY =
+    "sb_publishable_IWX9pWnPlLK0Gej8Jy2Nzw_XMuR6u_q";
 
 const db =
     window.supabase.createClient(
