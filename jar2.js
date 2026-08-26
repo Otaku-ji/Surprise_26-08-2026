@@ -716,7 +716,7 @@ const JAR2_DRAW_COOLDOWN =
     1500;
 
 const JAR2_START_DATE =
-    "2026-08-26";
+    "2026-08-25";
 
 
 /* =========================
