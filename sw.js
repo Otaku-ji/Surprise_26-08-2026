@@ -1,4 +1,4 @@
-const CACHE_NAME = "postit-game-v15";
+const CACHE_NAME = "postit-game-v16";
 
 
 const APP_FILES = [
@@ -36,7 +36,7 @@ self.addEventListener(
     event => {
 
         console.log(
-            "Service Worker: installing v15..."
+            "Service Worker: installing v16..."
         );
 
 
